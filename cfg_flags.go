@@ -18,6 +18,7 @@ import (
 var configFlag *string
 
 func init() {
+	// Flag to set the configuration file path via command line
 	configFlag = flag.String("config", "", "Configuration file path")
 }
 
@@ -67,8 +68,6 @@ func Parse(configFile string) error {
 	}
 	return nil
 }
-
-// ----------------------------------------------------------------------------------------
 
 func getValuesFromFile(configFile string) (map[string]string, error) {
 	// Read the file to a byte slice
