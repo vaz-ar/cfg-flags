@@ -11,6 +11,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"strconv"
 	"strings"
 )
@@ -22,21 +23,17 @@ func init() {
 	configFlag = flag.String("config", "", "Configuration file path")
 }
 
-func Parse(configFile string) error {
+func Parse() error {
 	// Parse the command line flags
 	flag.Parse()
 
-	var configFilePath string
-	if *configFlag != "" {
-		configFilePath = *configFlag
-	} else if configFile == "" {
-		return fmt.Errorf("cfg_flags: No config file path was given")
-	} else {
-		configFilePath = configFile
+	if *configFlag == "" {
+		log.Println("cfg_flags: No configuration file was given")
+		return nil
 	}
 
 	// Get the flags from the configuration file
-	valuesFromFile, err := getValuesFromFile(configFilePath)
+	valuesFromFile, err := getValuesFromFile(*configFlag)
 	if err != nil {
 		return err
 	}
