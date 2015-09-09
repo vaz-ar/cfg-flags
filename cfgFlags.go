@@ -4,8 +4,8 @@
 //
 // See LICENSE file.
 
-// Package to use an INI configuration file alongside the "flag" package
-package cfg_flags
+// Package cfgFlags implements an "hybrid" configuration management, using an INI configuration file alongside the "flag" package
+package cfgFlags
 
 import (
 	"flag"
@@ -23,12 +23,13 @@ func init() {
 	configFlag = flag.String("config", "", "Configuration file path")
 }
 
+// Parse is the equivalent of flag.Parse() except that it also retrieve configuration values fron an INI file.
 func Parse() error {
 	// Parse the command line flags
 	flag.Parse()
 
 	if *configFlag == "" {
-		log.Println("cfg_flags: No configuration file was given")
+		log.Println("cfgFlags: No configuration file was given")
 		return nil
 	}
 
@@ -45,7 +46,7 @@ func Parse() error {
 		f := flag.Lookup(key)
 		// If no flag matching "key" was found, return false
 		if f == nil {
-			return fmt.Errorf("cfg_flags: Unknow flag found in the configuration file (%q)\n", key)
+			return fmt.Errorf("cfgFlags: Unknow flag found in the configuration file (%q)\n", key)
 		}
 		// Iterate over the list of flags that are not yet set
 		for _, v := range missingFlags {
@@ -55,7 +56,7 @@ func Parse() error {
 				if f.Value.String() != value {
 					// If an error happen, return false
 					if err := f.Value.Set(value); err != nil {
-						return fmt.Errorf("cfg_flags: Error while parsing flag %q (error: %q)\n", key, err)
+						return fmt.Errorf("cfgFlags: Error while parsing flag %q (error: %q)\n", key, err)
 					}
 				}
 				// if we found the flag there is no need to continue to loop
@@ -70,7 +71,7 @@ func getValuesFromFile(configFile string) (map[string]string, error) {
 	// Read the file to a byte slice
 	content, err := ioutil.ReadFile(configFile)
 	if err != nil {
-		return nil, fmt.Errorf("cfg_flags: Error while reading configuration file %q: %s\n", configFile, err)
+		return nil, fmt.Errorf("cfgFlags: Error while reading configuration file %q: %s\n", configFile, err)
 	}
 
 	valuesFromFile := make(map[string]string)
@@ -84,13 +85,13 @@ func getValuesFromFile(configFile string) (map[string]string, error) {
 		// Split the string on the "=" character
 		fields := strings.Split(line, "=")
 		if len(fields) > 2 {
-			return nil, fmt.Errorf("cfg_flags: There is more than one \"=\" in the following line from the configuration file: %q (line %d)\n", line, i)
+			return nil, fmt.Errorf("cfgFlags: There is more than one \"=\" in the following line from the configuration file: %q (line %d)\n", line, i)
 		} else if len(fields) < 2 {
-			return nil, fmt.Errorf("cfg_flags: There is no \"=\" in the following line from the configuration file: %q (line %d)\n", line, i)
+			return nil, fmt.Errorf("cfgFlags: There is no \"=\" in the following line from the configuration file: %q (line %d)\n", line, i)
 		}
 		err := cleanString(&fields[1])
 		if err != nil {
-			return nil, fmt.Errorf("cfg_flags: Error while processing line %d from the configuration file: %s", i, err)
+			return nil, fmt.Errorf("cfgFlags: Error while processing line %d from the configuration file: %s", i, err)
 		}
 		// Return map: The key is the first field with leading and trailing spaces removed, the value is the second field "cleaned"
 		valuesFromFile[strings.TrimSpace(fields[0])] = fields[1]
@@ -101,7 +102,7 @@ func getValuesFromFile(configFile string) (map[string]string, error) {
 func getMissingFlags() []string {
 	var (
 		set, missing []string
-		found        bool = false
+		found        = false
 	)
 	// Visit only the flags that have been set
 	flag.Visit(func(f *flag.Flag) {
